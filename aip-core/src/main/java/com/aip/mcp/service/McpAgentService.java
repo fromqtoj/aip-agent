@@ -4,9 +4,14 @@ import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.memory.redis.RedisChatMemoryRepository;
 import com.aip.dto.AgentChatResponse;
 import com.aip.mcp.client.RemoteMcpToolCallbackProvider;
+import com.aip.skill.AgentSkillService;
+import com.aip.trace.AgentTraceContext;
+import com.aip.trace.AgentTraceContextHolder;
+import net.logstash.logback.argument.StructuredArguments;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -24,6 +29,8 @@ import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 @Service
 public class McpAgentService {
 
+    private static final Logger traceLog = LoggerFactory.getLogger("MCP_TRACE_LOGGER");
+
     private static final int MAX_FILE_CHAR_COUNT = 12000;
 
     private static final Set<String> TEXT_FILE_EXTENSIONS = Set.of(
@@ -36,6 +43,7 @@ public class McpAgentService {
             你是 aip-core 中的智能 Agent，已经接入远程 MCP 工具服务。
             你的主要目标是正确理解用户意图，并在必要时调用 MCP 工具完成信息获取、文件检查和环境分析。
             你也可能收到用户直接上传的文件内容，请优先基于真实文件内容和工具结果回答。
+            如果系统在用户问题前附加了技能说明，你必须先阅读技能，再按技能规划 MCP 工具调用。
 
             工作准则：
             1. 先判断问题能否直接回答，只有在需要读取文件、查看目录、获取时间、访问网络或执行命令时才调用工具。
@@ -58,12 +66,17 @@ public class McpAgentService {
 
     private final RemoteMcpToolCallbackProvider remoteMcpToolCallbackProvider;
 
+    private final AgentSkillService agentSkillService;
+
+    private final AgentTraceContextHolder traceContextHolder;
+
     public McpAgentService(ChatClient.Builder chatClientBuilder,
                            RedisChatMemoryRepository redisChatMemoryRepository,
-                           RemoteMcpToolCallbackProvider remoteMcpToolCallbackProvider) {
+                           RemoteMcpToolCallbackProvider remoteMcpToolCallbackProvider,
+                           AgentSkillService agentSkillService,
+                           AgentTraceContextHolder traceContextHolder) {
         this.chatClient = chatClientBuilder
                 .defaultSystem(SYSTEM_PROMPT)
-                .defaultAdvisors(new SimpleLoggerAdvisor())
                 .defaultOptions(DashScopeChatOptions.builder().withTopP(0.7).build())
                 .build();
         this.chatMemory = MessageWindowChatMemory.builder()
@@ -71,12 +84,13 @@ public class McpAgentService {
                 .maxMessages(100)
                 .build();
         this.remoteMcpToolCallbackProvider = remoteMcpToolCallbackProvider;
+        this.agentSkillService = agentSkillService;
+        this.traceContextHolder = traceContextHolder;
     }
 
     public AgentChatResponse chat(String question, String conversationId) {
         String resolvedConversationId = resolveConversationId(conversationId);
-        String answer = preparePrompt(question, resolvedConversationId).call().content();
-        return new AgentChatResponse(resolvedConversationId, answer, List.of());
+        return executeChat(question, resolvedConversationId, List.of());
     }
 
     public AgentChatResponse chatWithFiles(String question, String conversationId, MultipartFile[] files) {
@@ -90,13 +104,14 @@ public class McpAgentService {
         String resolvedConversationId = resolveConversationId(conversationId);
         List<String> fileNames = new ArrayList<>();
         String promptWithFiles = buildPromptWithFiles(question, files, fileNames);
-        String answer = preparePrompt(promptWithFiles, resolvedConversationId).call().content();
-        return new AgentChatResponse(resolvedConversationId, answer, fileNames);
+        return executeChat(promptWithFiles, resolvedConversationId, fileNames);
     }
 
-    private ChatClient.ChatClientRequestSpec preparePrompt(String question, String conversationId) {
-        ChatClient.ChatClientRequestSpec requestSpec = chatClient.prompt(question)
-                .toolCallbacks(remoteMcpToolCallbackProvider.getToolCallbacks())
+    private ChatClient.ChatClientRequestSpec preparePrompt(String question,
+                                                           String conversationId,
+                                                           AgentSkillService.SkillMatchResult skillMatchResult) {
+        ChatClient.ChatClientRequestSpec requestSpec = chatClient.prompt(appendSkillContext(question, skillMatchResult))
+                .toolCallbacks(remoteMcpToolCallbackProvider.getToolCallbacks(skillMatchResult.plannedMcpTools()))
                 .advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .advisors(spec -> spec.param(CONVERSATION_ID, conversationId));
 
@@ -174,5 +189,69 @@ public class McpAgentService {
 
         String extension = originalFilename.substring(originalFilename.lastIndexOf('.') + 1).toLowerCase();
         return TEXT_FILE_EXTENSIONS.contains(extension);
+    }
+
+    private String appendSkillContext(String question, AgentSkillService.SkillMatchResult skillMatchResult) {
+        String skillContext = skillMatchResult.skillContext();
+        if (!StringUtils.hasText(skillContext)) {
+            return question;
+        }
+
+        return """
+                在处理用户问题前，请先阅读以下技能说明，并严格按技能规划工具调用：
+
+                %s
+
+                用户原始问题：
+                %s
+                """.formatted(skillContext, question);
+    }
+
+    private AgentChatResponse executeChat(String question, String conversationId, List<String> fileNames) {
+        AgentSkillService.SkillMatchResult skillMatchResult = agentSkillService.resolveSkillContext(question);
+        List<AgentTraceContext.MatchedSkillTrace> matchedSkills = skillMatchResult.matchedSkills().stream()
+                .map(skill -> new AgentTraceContext.MatchedSkillTrace(
+                        skill.fileName(),
+                        skill.name(),
+                        skill.priority(),
+                        skill.matchScore(),
+                        skill.always(),
+                        skill.matchedKeywords(),
+                        skill.matchReason(),
+                        skill.plannedTools()
+                ))
+                .toList();
+        AgentTraceContext traceContext = new AgentTraceContext(
+                question,
+                conversationId,
+                matchedSkills,
+                skillMatchResult.plannedMcpTools()
+        );
+        traceContextHolder.set(traceContext);
+        try {
+            String answer = preparePrompt(question, conversationId, skillMatchResult).call().content();
+            return new AgentChatResponse(conversationId, answer, fileNames);
+        }
+        finally {
+            traceLog.info("MCP_TRACE_CHAIN {} {} {} {} {} {}",
+                    StructuredArguments.kv("question", abbreviate(question)),
+                    StructuredArguments.kv("conversationId", conversationId),
+                    StructuredArguments.kv("skillMatching", traceContext.skillMatching()),
+                    StructuredArguments.kv("toolPlanning", traceContext.toolPlanning()),
+                    StructuredArguments.kv("toolExecution", traceContext.toolExecution()),
+                    StructuredArguments.kv("planActualDiff", traceContext.planActualDiff()));
+            traceContextHolder.clear();
+        }
+    }
+
+    private String abbreviate(String text) {
+        if (!StringUtils.hasText(text)) {
+            return "";
+        }
+        String normalized = text.replaceAll("\\s+", " ").trim();
+        if (normalized.length() <= 240) {
+            return normalized;
+        }
+        return normalized.substring(0, 240) + "...";
     }
 }

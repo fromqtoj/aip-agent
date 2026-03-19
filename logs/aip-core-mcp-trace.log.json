@@ -1,0 +1,43 @@
+{
+  "@timestamp" : "2026-03-19T14:35:19.57309+08:00",
+  "@version" : "1",
+  "message" : "MCP_TRACE_CHAIN question=请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq2.docx conversationId=97f4158d-af2c-4624-8b01-c05d5edf8f09 skillMatching=SkillMatching[matchedSkills=[MatchedSkillTrace[fileName=word-export-planning.skill.md, name=Word Export Planning, priority=100, matchScore=4, always=false, matchedKeywords=[word, doc, docx, 文档], matchReason=agent: 用户明确要求将文章理成 Word 文档，指定文件名和标题，涉及 docx 导出与命名, plannedTools=[generate_word_document]]]] toolPlanning=ToolPlanning[plannedMcpTools=[generate_word_document]] toolExecution=ToolExecution[actualToolExecutions=[ToolExecutionTrace[tool=generate_word_document, durationMs=210, success=true, error=null, plannedBySkill=true, callSource=skill_planned]]] planActualDiff=PlanActualDiff[plannedAndCalledTools=[generate_word_document], missingPlannedTools=[], unexpectedActualTools=[]]",
+  "logger_name" : "MCP_TRACE_LOGGER",
+  "thread_name" : "http-nio-10666-exec-1",
+  "level" : "INFO",
+  "level_value" : 20000,
+  "question" : "请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq2.docx",
+  "conversationId" : "97f4158d-af2c-4624-8b01-c05d5edf8f09",
+  "skillMatching" : {
+    "matchedSkills" : [ {
+      "fileName" : "word-export-planning.skill.md",
+      "name" : "Word Export Planning",
+      "priority" : 100,
+      "matchScore" : 4,
+      "always" : false,
+      "matchedKeywords" : [ "word", "doc", "docx", "文档" ],
+      "matchReason" : "agent: 用户明确要求将文章理成 Word 文档，指定文件名和标题，涉及 docx 导出与命名",
+      "plannedTools" : [ "generate_word_document" ]
+    } ]
+  },
+  "toolPlanning" : {
+    "plannedMcpTools" : [ "generate_word_document" ]
+  },
+  "toolExecution" : {
+    "actualToolExecutions" : [ {
+      "tool" : "generate_word_document",
+      "durationMs" : 210,
+      "success" : true,
+      "error" : null,
+      "plannedBySkill" : true,
+      "callSource" : "skill_planned"
+    } ]
+  },
+  "planActualDiff" : {
+    "plannedAndCalledTools" : [ "generate_word_document" ],
+    "missingPlannedTools" : [ ],
+    "unexpectedActualTools" : [ ]
+  },
+  "app" : "aip-core",
+  "logType" : "mcp-trace"
+}

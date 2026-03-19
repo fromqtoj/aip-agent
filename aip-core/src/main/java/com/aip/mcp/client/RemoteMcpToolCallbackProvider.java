@@ -4,12 +4,17 @@ import com.aip.mcp.config.McpProperties;
 import com.aip.mcp.dto.ToolDescriptor;
 import com.aip.mcp.dto.ToolInvocationRequest;
 import com.aip.mcp.dto.ToolInvocationResponse;
+import com.aip.trace.AgentTraceContext;
+import com.aip.trace.AgentTraceContextHolder;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
+import org.springframework.util.StringUtils;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RemoteMcpToolCallbackProvider {
 
@@ -17,13 +22,17 @@ public class RemoteMcpToolCallbackProvider {
 
     private final String apiPrefix;
 
+    private final AgentTraceContextHolder traceContextHolder;
+
     private volatile ToolCallback[] cachedCallbacks = new ToolCallback[0];
 
-    public RemoteMcpToolCallbackProvider(McpProperties properties) {
+    public RemoteMcpToolCallbackProvider(McpProperties properties,
+                                         AgentTraceContextHolder traceContextHolder) {
         this.restClient = RestClient.builder()
                 .baseUrl(properties.getClient().getBaseUrl())
                 .build();
         this.apiPrefix = normalizeApiPrefix(properties.getServer().getApiPrefix());
+        this.traceContextHolder = traceContextHolder;
     }
 
     public ToolCallback[] getToolCallbacks() {
@@ -31,6 +40,30 @@ public class RemoteMcpToolCallbackProvider {
             refreshTools();
         }
         return cachedCallbacks.clone();
+    }
+
+    public ToolCallback[] getToolCallbacks(List<String> plannedToolNames) {
+        ToolCallback[] allCallbacks = getToolCallbacks();
+        if (plannedToolNames == null || plannedToolNames.isEmpty()) {
+            return allCallbacks;
+        }
+
+        Set<String> planned = new LinkedHashSet<>();
+        for (String plannedToolName : plannedToolNames) {
+            if (StringUtils.hasText(plannedToolName)) {
+                planned.add(plannedToolName.trim());
+            }
+        }
+        if (planned.isEmpty()) {
+            return allCallbacks;
+        }
+
+        ToolCallback[] filtered = java.util.Arrays.stream(allCallbacks)
+                .filter(callback -> planned.contains(callback.getToolDefinition().name()))
+                .toArray(ToolCallback[]::new);
+
+        // 兜底：规划工具名与服务注册名不一致时，避免无工具可用导致流程卡死。
+        return filtered.length == 0 ? allCallbacks : filtered;
     }
 
     public synchronized List<ToolDescriptor> refreshTools() {
@@ -63,16 +96,32 @@ public class RemoteMcpToolCallbackProvider {
 
             @Override
             public String call(String toolInput) {
-                ToolInvocationResponse response = restClient.post()
-                        .uri(apiPrefix + "/tools/{toolName}/invoke", descriptor.getName())
-                        .body(new ToolInvocationRequest(toolInput))
-                        .retrieve()
-                        .body(ToolInvocationResponse.class);
+                AgentTraceContext traceContext = traceContextHolder.get();
+                long startNanos = System.nanoTime();
+                try {
+                    ToolInvocationResponse response = restClient.post()
+                            .uri(apiPrefix + "/tools/{toolName}/invoke", descriptor.getName())
+                            .body(new ToolInvocationRequest(toolInput))
+                            .retrieve()
+                            .body(ToolInvocationResponse.class);
 
-                if (response == null) {
-                    throw new IllegalStateException("远程工具调用没有返回结果: " + descriptor.getName());
+                    if (response == null) {
+                        throw new IllegalStateException("远程工具调用没有返回结果: " + descriptor.getName());
+                    }
+
+                    long durationMs = (System.nanoTime() - startNanos) / 1_000_000;
+                    if (traceContext != null) {
+                        traceContext.addToolExecution(descriptor.getName(), durationMs, true, null);
+                    }
+                    return response.getResult();
                 }
-                return response.getResult();
+                catch (RuntimeException e) {
+                    long durationMs = (System.nanoTime() - startNanos) / 1_000_000;
+                    if (traceContext != null) {
+                        traceContext.addToolExecution(descriptor.getName(), durationMs, false, abbreviate(e.getMessage()));
+                    }
+                    throw e;
+                }
             }
         };
     }
@@ -82,5 +131,16 @@ public class RemoteMcpToolCallbackProvider {
             return "/mcp/server";
         }
         return prefix.startsWith("/") ? prefix : "/" + prefix;
+    }
+
+    private String abbreviate(String text) {
+        if (text == null) {
+            return "";
+        }
+        String normalized = text.replaceAll("\\s+", " ").trim();
+        if (normalized.length() <= 240) {
+            return normalized;
+        }
+        return normalized.substring(0, 240) + "...";
     }
 }

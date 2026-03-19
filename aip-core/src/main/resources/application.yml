@@ -1,6 +1,10 @@
 server:
   port: 10666
 
+logging:
+  file:
+    path: /Users/qijian/Desktop/爱化身/aip-agent/logs
+
 spring:
   application:
     name: aip-core
@@ -16,6 +20,11 @@ spring:
         timeout:  5000
 
 aip:
+  agent:
+    skill:
+      enabled: true
+      path: ./aip-core/skills
+      max-matched: 3
   mcp:
     server:
       api-prefix: /mcp/server
