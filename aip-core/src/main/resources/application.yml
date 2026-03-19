@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: aip-agent
+    name: aip-core
   ai:
     dashscope:
       api-key: sk-1e62ec4aa62943709062e161230e191c
@@ -14,3 +14,10 @@ spring:
         port: 16379
         password: 111333
         timeout:  5000
+
+aip:
+  mcp:
+    server:
+      api-prefix: /mcp/server
+    client:
+      base-url: http://127.0.0.1:10667

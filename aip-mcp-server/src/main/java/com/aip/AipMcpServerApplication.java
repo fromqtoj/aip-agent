@@ -4,10 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AipAgentApplication {
+public class AipMcpServerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(AipAgentApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(AipMcpServerApplication.class, args);
+    }
 }

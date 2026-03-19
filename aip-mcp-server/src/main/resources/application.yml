@@ -1,0 +1,39 @@
+server:
+  port: 10667
+
+spring:
+  application:
+    name: aip-mcp-server
+
+aip:
+  mcp:
+    workspace-root: ${user.dir}
+    server:
+      api-prefix: /mcp/server
+    command:
+      timeout-seconds: 30
+      allow-list:
+        - pwd
+        - ls
+        - cat
+        - echo
+        - git
+        - mvn
+        - java
+
+file:
+  security:
+    enabled: true
+
+general:
+  file:
+    storage:
+      path: ./storage/files
+
+external:
+  export:
+    path: /Users/qijian/Desktop/爱化身
+
+project:
+  workspace:
+    path: ${aip.mcp.workspace-root}

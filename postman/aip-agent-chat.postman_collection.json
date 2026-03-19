@@ -1,0 +1,138 @@
+{
+  "info": {
+    "_postman_id": "7f0b69f2-7db7-4b8a-9690-8c9f5b57f2d1",
+    "name": "AIP Agent Chat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "aip-core 精简后的 Agent 接口集合，只包含 /agent/chat 和 /agent/chat/files。"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:10666"
+    },
+    {
+      "key": "conversationId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. 写东北烧烤文章",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "if (json && json.conversationId) {",
+              "    pm.collectionVariables.set('conversationId', json.conversationId);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/agent/chat",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "agent",
+            "chat"
+          ]
+        },
+        "description": "先让 Agent 写文章。返回的 conversationId 会自动保存到集合变量 conversationId。"
+      },
+      "response": []
+    },
+    {
+      "name": "2. 基于上一次会话生成 Word",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"把我们刚才关于东北烧烤的文章整理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq.docx。\",\n  \"conversationId\": \"{{conversationId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/agent/chat",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "agent",
+            "chat"
+          ]
+        },
+        "description": "使用上一步自动保存的 conversationId，继续同一轮对话，让 Agent 自动调用 generate_word_document。"
+      },
+      "response": []
+    },
+    {
+      "name": "3. 多文件聊天",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "question",
+              "value": "请根据我上传的多个文件，整理重点并给出总结。",
+              "type": "text"
+            },
+            {
+              "key": "conversationId",
+              "value": "files-demo-001",
+              "type": "text"
+            },
+            {
+              "key": "files",
+              "type": "file",
+              "src": ""
+            },
+            {
+              "key": "files",
+              "type": "file",
+              "src": ""
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/agent/chat/files",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "agent",
+            "chat",
+            "files"
+          ]
+        },
+        "description": "在 Postman 中给两个 files 字段各自选择文件即可。"
+      },
+      "response": []
+    }
+  ]
+}
