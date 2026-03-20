@@ -122,6 +122,20 @@ public class AgentSkillService {
         return result;
     }
 
+    public List<SkillCatalogEntry> listSkillCatalog() {
+        if (!skillEnabled) {
+            return List.of();
+        }
+
+        return loadSkillDefinitions().stream()
+                .map(skill -> new SkillCatalogEntry(
+                        skill.file().getFileName().toString(),
+                        skill.name(),
+                        skill.plannedTools()
+                ))
+                .toList();
+    }
+
     private List<MatchedSkill> matchByAgent(String question, List<SkillDefinition> skillDefinitions) {
         if (!StringUtils.hasText(question)) {
             return List.of();
@@ -528,6 +542,11 @@ public class AgentSkillService {
         public static SkillMatchResult empty() {
             return new SkillMatchResult("", List.of(), List.of());
         }
+    }
+
+    public record SkillCatalogEntry(String fileName,
+                                    String name,
+                                    List<String> plannedTools) {
     }
 
     private record MatchDetail(int score, List<String> matchedKeywords) {

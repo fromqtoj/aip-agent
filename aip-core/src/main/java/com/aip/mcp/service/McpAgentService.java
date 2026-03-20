@@ -2,12 +2,13 @@ package com.aip.mcp.service;
 
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.memory.redis.RedisChatMemoryRepository;
+import com.aip.agent.AgentExecutor;
 import com.aip.dto.AgentChatResponse;
 import com.aip.mcp.client.RemoteMcpToolCallbackProvider;
 import com.aip.skill.AgentSkillService;
 import com.aip.trace.AgentTraceContext;
+import com.aip.trace.AgentTraceLogFormatter;
 import com.aip.trace.AgentTraceContextHolder;
-import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -27,7 +28,7 @@ import java.util.UUID;
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
 @Service
-public class McpAgentService {
+public class McpAgentService implements AgentExecutor {
 
     private static final Logger traceLog = LoggerFactory.getLogger("MCP_TRACE_LOGGER");
 
@@ -88,11 +89,18 @@ public class McpAgentService {
         this.traceContextHolder = traceContextHolder;
     }
 
+    @Override
+    public String agentType() {
+        return "mcp";
+    }
+
+    @Override
     public AgentChatResponse chat(String question, String conversationId) {
         String resolvedConversationId = resolveConversationId(conversationId);
         return executeChat(question, resolvedConversationId, List.of());
     }
 
+    @Override
     public AgentChatResponse chatWithFiles(String question, String conversationId, MultipartFile[] files) {
         if (!StringUtils.hasText(question)) {
             throw new IllegalArgumentException("question 不能为空");
@@ -233,13 +241,7 @@ public class McpAgentService {
             return new AgentChatResponse(conversationId, answer, fileNames);
         }
         finally {
-            traceLog.info("MCP_TRACE_CHAIN {} {} {} {} {} {}",
-                    StructuredArguments.kv("question", abbreviate(question)),
-                    StructuredArguments.kv("conversationId", conversationId),
-                    StructuredArguments.kv("skillMatching", traceContext.skillMatching()),
-                    StructuredArguments.kv("toolPlanning", traceContext.toolPlanning()),
-                    StructuredArguments.kv("toolExecution", traceContext.toolExecution()),
-                    StructuredArguments.kv("planActualDiff", traceContext.planActualDiff()));
+            traceLog.info(AgentTraceLogFormatter.format(traceContext, agentSkillService.listSkillCatalog()));
             traceContextHolder.clear();
         }
     }

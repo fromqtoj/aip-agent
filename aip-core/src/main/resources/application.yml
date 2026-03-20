@@ -21,6 +21,30 @@ spring:
 
 aip:
   agent:
+    # ========================= 切换说明（只改下面两行） =========================
+    # 原始 Agent（Spring AI + MCP）:
+    #   active: mcp
+    #   claude-code-cli.enabled: false
+    #
+    # Claude Code Agent:
+    #   active: claude-code-cli
+    #   claude-code-cli.enabled: true
+    #
+    # 你只需要改这两个键：
+    # 1) active
+    # 2) claude-code-cli.enabled
+    # ======================================================================
+    active: claude-code-cli
+    claude-code-cli:
+      enabled: true
+      command-template:
+        - claude
+        - -p
+        - "{prompt}"
+      timeout-seconds: 180
+      working-directory: /Users/qijian/Desktop/爱化身/aip-agent
+      append-prompt-when-missing: true
+      environment: {}
     skill:
       enabled: true
       path: ./aip-core/skills

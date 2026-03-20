@@ -9,16 +9,19 @@ import com.aip.trace.AgentTraceContextHolder;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.client.RestClient;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClient;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class RemoteMcpToolCallbackProvider {
 
     private final RestClient restClient;
+
+    private final String baseUrl;
 
     private final String apiPrefix;
 
@@ -28,11 +31,29 @@ public class RemoteMcpToolCallbackProvider {
 
     public RemoteMcpToolCallbackProvider(McpProperties properties,
                                          AgentTraceContextHolder traceContextHolder) {
+        this.baseUrl = properties.getClient().getBaseUrl();
         this.restClient = RestClient.builder()
-                .baseUrl(properties.getClient().getBaseUrl())
+                .baseUrl(baseUrl)
                 .build();
         this.apiPrefix = normalizeApiPrefix(properties.getServer().getApiPrefix());
         this.traceContextHolder = traceContextHolder;
+    }
+
+    public void assertServerAvailable() {
+        try {
+            Map<String, Object> health = restClient.get()
+                    .uri(apiPrefix + "/health")
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+            if (health == null) {
+                throw new IllegalStateException("MCP health 接口返回空结果");
+            }
+        }
+        catch (RuntimeException e) {
+            throw new IllegalStateException("MCP 工具服务不可用，请确认 aip-mcp-server 已启动。地址="
+                    + baseUrl + apiPrefix + "/health", e);
+        }
     }
 
     public ToolCallback[] getToolCallbacks() {

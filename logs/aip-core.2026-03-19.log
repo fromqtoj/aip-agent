@@ -1,0 +1,221 @@
+2026-03-19 17:07:08.808 [main] INFO  com.aip.AipCoreApplication - Starting AipCoreApplication using Java 21.0.7 with PID 2116 (/Users/qijian/Desktop/爱化身/aip-agent/aip-core/target/classes started by qijian in /Users/qijian/Desktop/爱化身/aip-agent)
+2026-03-19 17:07:08.809 [main] INFO  com.aip.AipCoreApplication - No active profile set, falling back to 1 default profile: "default"
+2026-03-19 17:07:09.202 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 10666 (http)
+2026-03-19 17:07:09.207 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-10666"]
+2026-03-19 17:07:09.208 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-19 17:07:09.208 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.42]
+2026-03-19 17:07:09.223 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-03-19 17:07:09.223 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 397 ms
+2026-03-19 17:07:09.681 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-10666"]
+2026-03-19 17:07:09.686 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 10666 (http) with context path '/'
+2026-03-19 17:07:09.690 [main] INFO  com.aip.AipCoreApplication - Started AipCoreApplication in 1.163 seconds (process running for 1.748)
+2026-03-19 17:07:13.764 [http-nio-10666-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-19 17:07:13.764 [http-nio-10666-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-03-19 17:07:13.764 [http-nio-10666-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2026-03-19 17:07:14.649 [http-nio-10666-exec-1] INFO  com.aip.skill.AgentSkillService - SKILL_TRACE question=你是什么模型 matchSource=rule-fallback matchedSkills=[MatchedSkill[fileName=general-mcp-planning.skill.md, name=General MCP Planning, priority=20, matchScore=0, always=true, matchedKeywords=[always], matchReason=always=true, plannedTools=[read_file, scan_directory, search_files, get_file_info, http_get, http_post, get_current_time, execute_command]]] plannedMcpTools=[read_file, scan_directory, search_files, get_file_info, http_get, http_post, get_current_time, execute_command]
+2026-03-19 17:09:11.308 [http-nio-10666-exec-3] INFO  com.aip.skill.AgentSkillService - SKILL_TRACE question=请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq6.docx matchSource=agent matchedSkills=[MatchedSkill[fileName=word-export-planning.skill.md, name=Word Export Planning, priority=100, matchScore=4, always=false, matchedKeywords=[word, doc, docx, 文档], matchReason=agent: 用户明确要求将文章理成 Word 文档，指定文件名和格式（.docx），匹配 word、docx、导出等关键词, plannedTools=[generate_word_document]]] plannedMcpTools=[generate_word_document]
+2026-03-19 17:10:34.562 [http-nio-10666-exec-3] ERROR o.a.c.c.C.[.[localhost].[/].[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: ClaudeCode CLI 返回空内容，请检查 command-template 配置。] with root cause
+java.lang.IllegalStateException: ClaudeCode CLI 返回空内容，请检查 command-template 配置。
+	at com.aip.agent.service.ClaudeCodeCliAgentService.executeByCli(ClaudeCodeCliAgentService.java:641)
+	at com.aip.agent.service.ClaudeCodeCliAgentService.executeToolAwareCli(ClaudeCodeCliAgentService.java:182)
+	at com.aip.agent.service.ClaudeCodeCliAgentService.executeAgent(ClaudeCodeCliAgentService.java:140)
+	at com.aip.agent.service.ClaudeCodeCliAgentService.chat(ClaudeCodeCliAgentService.java:104)
+	at com.aip.agent.service.AgentRoutingService.chat(AgentRoutingService.java:28)
+	at com.aip.controller.AgentController.chat(AgentController.java:26)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-03-19 17:34:40.382 [http-nio-10666-exec-4] INFO  com.aip.skill.AgentSkillService - SKILL_TRACE question=请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq7.docx matchSource=agent matchedSkills=[MatchedSkill[fileName=word-export-planning.skill.md, name=Word Export Planning, priority=100, matchScore=4, always=false, matchedKeywords=[word, doc, docx, 文档], matchReason=agent: 用户明确要求将文章理成 Word 文档，指定文件名和格式（.docx），与该 skill 的关键词 'word', 'docx', '文档', '导出' 高度匹配, plannedTools=[generate_word_document]]] plannedMcpTools=[generate_word_document]
+2026-03-19 17:59:38.427 [SpringApplicationShutdownHook] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-19 17:59:38.434 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-03-19 17:59:38.437 [SpringApplicationShutdownHook] INFO  c.a.c.ai.memory.redis.RedisChatMemoryRepository - Redis connection pool closed
+2026-03-19 18:29:57.774 [main] INFO  com.aip.AipCoreApplication - Starting AipCoreApplication using Java 21.0.7 with PID 5902 (/Users/qijian/Desktop/爱化身/aip-agent/aip-core/target/classes started by qijian in /Users/qijian/Desktop/爱化身/aip-agent)
+2026-03-19 18:29:57.775 [main] INFO  com.aip.AipCoreApplication - No active profile set, falling back to 1 default profile: "default"
+2026-03-19 18:29:58.125 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 10666 (http)
+2026-03-19 18:29:58.130 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-10666"]
+2026-03-19 18:29:58.131 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-19 18:29:58.131 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.42]
+2026-03-19 18:29:58.147 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-03-19 18:29:58.147 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 357 ms
+2026-03-19 18:29:58.458 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-10666"]
+2026-03-19 18:29:58.462 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 10666 (http) with context path '/'
+2026-03-19 18:29:58.465 [main] INFO  com.aip.AipCoreApplication - Started AipCoreApplication in 0.963 seconds (process running for 1.28)
+2026-03-19 18:30:01.598 [http-nio-10666-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-19 18:30:01.599 [http-nio-10666-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-03-19 18:30:01.599 [http-nio-10666-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2026-03-19 18:30:03.406 [http-nio-10666-exec-1] INFO  com.aip.skill.AgentSkillService - SKILL_TRACE question=请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq7.docx matchSource=agent matchedSkills=[MatchedSkill[fileName=word-export-planning.skill.md, name=Word Export Planning, priority=100, matchScore=4, always=false, matchedKeywords=[word, doc, docx, 文档], matchReason=agent: 用户明确要求将文章理成 Word 文档，指定文件名和格式（.docx），与该 skill 的 keywords 和 plannedTools 高度匹配, plannedTools=[generate_word_document]]] plannedMcpTools=[generate_word_document]
+2026-03-19 18:35:34.784 [http-nio-10666-exec-1] ERROR o.a.c.c.C.[.[localhost].[/].[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: ClaudeCode CLI 工具循环超过最大轮次，仍未返回最终答案。] with root cause
+java.lang.IllegalStateException: ClaudeCode CLI 工具循环超过最大轮次，仍未返回最终答案。
+	at com.aip.agent.service.ClaudeCodeCliAgentService.executeToolAwareCli(ClaudeCodeCliAgentService.java:246)
+	at com.aip.agent.service.ClaudeCodeCliAgentService.executeAgent(ClaudeCodeCliAgentService.java:140)
+	at com.aip.agent.service.ClaudeCodeCliAgentService.chat(ClaudeCodeCliAgentService.java:104)
+	at com.aip.agent.service.AgentRoutingService.chat(AgentRoutingService.java:28)
+	at com.aip.controller.AgentController.chat(AgentController.java:26)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-03-19 18:44:18.711 [http-nio-10666-exec-2] INFO  com.aip.skill.AgentSkillService - SKILL_TRACE question=请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq8.docx matchSource=agent matchedSkills=[MatchedSkill[fileName=word-export-planning.skill.md, name=Word Export Planning, priority=100, matchScore=4, always=false, matchedKeywords=[word, doc, docx, 文档], matchReason=agent: 用户明确要求将文章理成 Word 文档，指定文件名和格式（.docx），匹配 word、docx、导出等关键词, plannedTools=[generate_word_document]]] plannedMcpTools=[generate_word_document]
+2026-03-19 18:50:07.932 [http-nio-10666-exec-2] ERROR o.a.c.c.C.[.[localhost].[/].[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: ClaudeCode CLI 工具循环超过最大轮次，仍未返回最终答案。] with root cause
+java.lang.IllegalStateException: ClaudeCode CLI 工具循环超过最大轮次，仍未返回最终答案。
+	at com.aip.agent.service.ClaudeCodeCliAgentService.executeToolAwareCli(ClaudeCodeCliAgentService.java:246)
+	at com.aip.agent.service.ClaudeCodeCliAgentService.executeAgent(ClaudeCodeCliAgentService.java:140)
+	at com.aip.agent.service.ClaudeCodeCliAgentService.chat(ClaudeCodeCliAgentService.java:104)
+	at com.aip.agent.service.AgentRoutingService.chat(AgentRoutingService.java:28)
+	at com.aip.controller.AgentController.chat(AgentController.java:26)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-03-19 18:51:56.039 [SpringApplicationShutdownHook] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-19 18:51:56.043 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-03-19 18:51:56.050 [SpringApplicationShutdownHook] INFO  c.a.c.ai.memory.redis.RedisChatMemoryRepository - Redis connection pool closed
+2026-03-19 18:52:00.422 [main] INFO  com.aip.AipCoreApplication - Starting AipCoreApplication using Java 21.0.7 with PID 10481 (/Users/qijian/Desktop/爱化身/aip-agent/aip-core/target/classes started by qijian in /Users/qijian/Desktop/爱化身/aip-agent)
+2026-03-19 18:52:00.422 [main] INFO  com.aip.AipCoreApplication - No active profile set, falling back to 1 default profile: "default"
+2026-03-19 18:52:00.810 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 10666 (http)
+2026-03-19 18:52:00.815 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-10666"]
+2026-03-19 18:52:00.816 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-19 18:52:00.816 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.42]
+2026-03-19 18:52:00.830 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-03-19 18:52:00.830 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 394 ms
+2026-03-19 18:52:01.139 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-10666"]
+2026-03-19 18:52:01.144 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 10666 (http) with context path '/'
+2026-03-19 18:52:01.148 [main] INFO  com.aip.AipCoreApplication - Started AipCoreApplication in 0.989 seconds (process running for 1.278)
+2026-03-19 18:52:12.108 [http-nio-10666-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-19 18:52:12.108 [http-nio-10666-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-03-19 18:52:12.109 [http-nio-10666-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-03-19 18:52:14.140 [http-nio-10666-exec-1] INFO  com.aip.skill.AgentSkillService - SKILL_TRACE question=请写一篇关于东北烧烤的文章，要求口语化、有烟火气、适合做公众号，800字左右。理成 Word 文档，标题叫《东北烧烤：人间烟火最抚人心》，文件名叫 dongbei-bbq7.docx matchSource=agent matchedSkills=[MatchedSkill[fileName=word-export-planning.skill.md, name=Word Export Planning, priority=100, matchScore=4, always=false, matchedKeywords=[word, doc, docx, 文档], matchReason=agent: 用户明确要求将文章理成 Word 文档，指定文件名和格式（.docx），匹配该 skill 的 word/docx/导出等关键词, plannedTools=[generate_word_document]]] plannedMcpTools=[generate_word_document]
+2026-03-19 19:00:51.627 [http-nio-10666-exec-3] INFO  com.aip.skill.AgentSkillService - SKILL_TRACE question=你是什么模型 matchSource=rule-fallback matchedSkills=[MatchedSkill[fileName=general-mcp-planning.skill.md, name=General MCP Planning, priority=20, matchScore=0, always=true, matchedKeywords=[always], matchReason=always=true, plannedTools=[read_file, scan_directory, search_files, get_file_info, http_get, http_post, get_current_time, execute_command]]] plannedMcpTools=[read_file, scan_directory, search_files, get_file_info, http_get, http_post, get_current_time, execute_command]

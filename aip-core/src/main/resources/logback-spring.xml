@@ -22,13 +22,12 @@
     </appender>
 
     <appender name="MCP_TRACE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/${APP_NAME}-mcp-trace.log.json</file>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
-            <customFields>{"app":"${APP_NAME}","logType":"mcp-trace"}</customFields>
+        <file>${LOG_PATH}/${APP_NAME}-mcp.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%n%m%n%n----------------------------------------%n%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${APP_NAME}-mcp-trace.%d{yyyy-MM-dd}.log.json</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-mcp.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
             <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
