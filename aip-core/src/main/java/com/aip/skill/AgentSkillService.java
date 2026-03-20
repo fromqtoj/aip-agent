@@ -59,6 +59,12 @@ public class AgentSkillService {
     @Value("${aip.agent.skill.max-matched:3}")
     private int maxMatchedSkills;
 
+    private static final long CACHE_TTL_MS = 30_000;
+
+    private volatile List<SkillDefinition> cachedSkills;
+
+    private volatile long cacheTimestamp;
+
     public AgentSkillService(ChatClient.Builder chatClientBuilder, ObjectMapper objectMapper) {
         this.skillSelectorClient = chatClientBuilder
                 .defaultSystem(SKILL_SELECTOR_SYSTEM_PROMPT)
@@ -301,6 +307,11 @@ public class AgentSkillService {
     }
 
     private List<SkillDefinition> loadSkillDefinitions() {
+        List<SkillDefinition> cached = cachedSkills;
+        if (cached != null && (System.currentTimeMillis() - cacheTimestamp) < CACHE_TTL_MS) {
+            return cached;
+        }
+
         Path root = resolveSkillRoot();
         if (root == null) {
             log.warn("SKILL_PATH_NOT_FOUND {}",
@@ -309,13 +320,16 @@ public class AgentSkillService {
         }
 
         try (Stream<Path> stream = Files.walk(root, 2)) {
-            return stream
+            List<SkillDefinition> loaded = stream
                     .filter(Files::isRegularFile)
                     .filter(this::isSkillFile)
                     .map(this::parseSkillDefinition)
                     .filter(Objects::nonNull)
                     .filter(skill -> StringUtils.hasText(skill.content()))
                     .toList();
+            cachedSkills = loaded;
+            cacheTimestamp = System.currentTimeMillis();
+            return loaded;
         }
         catch (IOException e) {
             throw new IllegalStateException("读取 skill 目录失败: " + root, e);

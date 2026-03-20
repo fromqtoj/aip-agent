@@ -40,6 +40,8 @@ public class AgentProperties {
 
         private Map<String, String> environment = new HashMap<>();
 
+        private String allowedExportRoot = "/Users/qijian/Desktop/爱化身";
+
         public boolean isEnabled() {
             return enabled;
         }
@@ -86,6 +88,14 @@ public class AgentProperties {
 
         public void setEnvironment(Map<String, String> environment) {
             this.environment = environment;
+        }
+
+        public String getAllowedExportRoot() {
+            return allowedExportRoot;
+        }
+
+        public void setAllowedExportRoot(String allowedExportRoot) {
+            this.allowedExportRoot = allowedExportRoot;
         }
     }
 }

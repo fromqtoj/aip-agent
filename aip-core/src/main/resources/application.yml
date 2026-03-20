@@ -10,13 +10,13 @@ spring:
     name: aip-core
   ai:
     dashscope:
-      api-key: sk-1e62ec4aa62943709062e161230e191c
+      api-key: ${DASHSCOPE_API_KEY:sk-1e62ec4aa62943709062e161230e191c}
 
     memory:
       redis:
         host: 39.105.37.222
         port: 16379
-        password: 111333
+        password: ${REDIS_PASSWORD:111333}
         timeout:  5000
 
 aip:
@@ -44,6 +44,7 @@ aip:
       timeout-seconds: 180
       working-directory: /Users/qijian/Desktop/爱化身/aip-agent
       append-prompt-when-missing: true
+      allowed-export-root: /Users/qijian/Desktop/爱化身
       environment: {}
     skill:
       enabled: true

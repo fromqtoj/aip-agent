@@ -21,6 +21,10 @@ public class SystemCommandTool implements McpToolHandler {
 
     private static final Pattern EXECUTABLE_PATTERN = Pattern.compile("^\\s*([\\w./-]+)");
 
+    private static final Pattern SHELL_META_CHARS = Pattern.compile("[;|&$`()><{}\\[\\]!#]");
+
+    private static final Set<String> INTERNAL_COMMANDS = Set.of("which", "where", "ps", "tasklist");
+
     private final Path workspaceRoot;
 
     private final Set<String> allowList;
@@ -76,13 +80,13 @@ public class SystemCommandTool implements McpToolHandler {
     @Tool(name = "check_command_exists", description = "检查系统中是否存在某个命令")
     public String checkCommandExists(@ToolParam(description = "命令名称，例如 git") String command) {
         String checkCommand = isWindows() ? "where " + command : "which " + command;
-        return executeCommand(checkCommand, workspaceRoot.toString(), 10);
+        return executeInternalCommand(checkCommand, 10);
     }
 
     @Tool(name = "list_processes", description = "查看当前系统进程列表")
     public String listProcesses() {
         String command = isWindows() ? "tasklist" : "ps aux";
-        return executeCommand(command, workspaceRoot.toString(), 10);
+        return executeInternalCommand(command, 10);
     }
 
     @Tool(name = "execute_command_async", description = "异步执行系统命令，立即返回进程 ID")
@@ -117,15 +121,54 @@ public class SystemCommandTool implements McpToolHandler {
                 .orElse("进程不存在: " + pid);
     }
 
+    private String executeInternalCommand(String command, int timeoutSeconds) {
+        validateCommand(command, true);
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            if (isWindows()) {
+                processBuilder.command("cmd.exe", "/c", command);
+            } else {
+                processBuilder.command("sh", "-c", command);
+            }
+            processBuilder.directory(workspaceRoot.toFile());
+            processBuilder.redirectErrorStream(true);
+
+            Process process = processBuilder.start();
+            boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                return "命令执行超时: " + command;
+            }
+
+            String output = readOutput(process);
+            return "退出码: " + process.exitValue() + "\n输出:\n" + output;
+        } catch (IOException e) {
+            throw new IllegalStateException("命令执行失败: " + e.getMessage(), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("命令执行被中断", e);
+        }
+    }
+
     private void validateCommand(String command) {
+        validateCommand(command, false);
+    }
+
+    private void validateCommand(String command, boolean allowInternal) {
         Matcher matcher = EXECUTABLE_PATTERN.matcher(command == null ? "" : command);
         if (!matcher.find()) {
             throw new IllegalArgumentException("命令不能为空");
         }
 
         String executable = Paths.get(matcher.group(1)).getFileName().toString();
-        if (!allowList.contains(executable)) {
+        boolean allowed = allowList.contains(executable)
+                || (allowInternal && INTERNAL_COMMANDS.contains(executable));
+        if (!allowed) {
             throw new IllegalArgumentException("命令未在白名单中: " + executable);
+        }
+
+        if (SHELL_META_CHARS.matcher(command).find()) {
+            throw new IllegalArgumentException("命令包含不允许的特殊字符，禁止使用 ;|&$`()><{} 等 shell 元字符");
         }
     }
 

@@ -8,7 +8,9 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -19,7 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
-public class NetworkTool implements McpToolHandler {
+public class NetworkTool implements McpToolHandler, org.springframework.beans.factory.DisposableBean {
 
     private final HttpClient httpClient;
 
@@ -71,6 +73,7 @@ public class NetworkTool implements McpToolHandler {
     public String downloadFile(
             @ToolParam(description = "文件 URL") String url,
             @ToolParam(required = false, description = "保存路径，留空时自动保存到通用文件目录") String savePath) {
+        validateUrl(url);
         try {
             Path targetPath;
             if (savePath == null || savePath.isBlank()) {
@@ -114,11 +117,13 @@ public class NetworkTool implements McpToolHandler {
             @ToolParam(description = "上传 URL") String url,
             @ToolParam(description = "文件路径") String filePath,
             @ToolParam(required = false, description = "表单字段名，默认 file") String fieldName) {
+        validateUrl(url);
         try {
             Path sourcePath = Path.of(filePath);
             if (!sourcePath.isAbsolute()) {
                 sourcePath = filePathSecurityManager.getProjectWorkspaceRoot().resolve(sourcePath).normalize();
             }
+            sourcePath = filePathSecurityManager.validateAndNormalizePath(sourcePath.toString(), "project");
             if (!Files.exists(sourcePath)) {
                 throw new IllegalArgumentException("文件不存在: " + sourcePath);
             }
@@ -153,7 +158,50 @@ public class NetworkTool implements McpToolHandler {
         }
     }
 
+    @Override
+    public void destroy() {
+        httpClient.close();
+    }
+
+    private void validateUrl(String url) {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("URL 不能为空");
+        }
+        URI uri;
+        try {
+            uri = URI.create(url.strip());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("URL 格式无效: " + url, e);
+        }
+
+        String scheme = uri.getScheme();
+        if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
+            throw new IllegalArgumentException("仅允许 http/https 协议，当前: " + scheme);
+        }
+
+        String host = uri.getHost();
+        if (host == null || host.isBlank()) {
+            throw new IllegalArgumentException("URL 缺少主机名");
+        }
+
+        String lowerHost = host.toLowerCase();
+        if (lowerHost.equals("localhost") || lowerHost.endsWith(".local")) {
+            throw new IllegalArgumentException("禁止访问本地地址: " + host);
+        }
+
+        try {
+            InetAddress address = InetAddress.getByName(host);
+            if (address.isLoopbackAddress() || address.isLinkLocalAddress()
+                    || address.isSiteLocalAddress() || address.isAnyLocalAddress()) {
+                throw new IllegalArgumentException("禁止访问内网地址: " + host + " (" + address.getHostAddress() + ")");
+            }
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("无法解析主机: " + host, e);
+        }
+    }
+
     private String execute(String url, String method, String body, String contentType, String headers) {
+        validateUrl(url);
         try {
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(url))

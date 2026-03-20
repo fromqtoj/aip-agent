@@ -20,13 +20,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,7 +52,7 @@ public class ClaudeCodeCliAgentService implements AgentExecutor {
 
     private static final Pattern JSON_CODE_BLOCK = Pattern.compile("```(?:json)?\\s*(\\{.*})\\s*```", Pattern.DOTALL);
 
-    private static final String ALLOWED_EXPORT_ROOT = "/Users/qijian/Desktop/爱化身";
+    private static final int MAX_TOOL_RESULT_LENGTH = 2000;
 
     private static final Set<String> TEXT_FILE_EXTENSIONS = Set.of(
             "txt", "md", "markdown", "json", "xml", "html", "htm", "csv", "log",
@@ -363,7 +364,7 @@ public class ClaudeCodeCliAgentService implements AgentExecutor {
                 case "tool_success" -> builder.append("- 已执行工具：").append(exchange.tool()).append("\n")
                         .append("  调用原因：").append(defaultText(exchange.reason(), "未提供")).append("\n")
                         .append("  参数：").append(exchange.arguments()).append("\n")
-                        .append("  结果：").append(exchange.result()).append("\n");
+                        .append("  结果：").append(truncateToolResult(exchange.result())).append("\n");
                 case "tool_failure" -> builder.append("- 工具执行失败：").append(exchange.tool()).append("\n")
                         .append("  调用原因：").append(defaultText(exchange.reason(), "未提供")).append("\n")
                         .append("  参数：").append(exchange.arguments()).append("\n")
@@ -373,6 +374,13 @@ public class ClaudeCodeCliAgentService implements AgentExecutor {
             }
         }
         return builder.toString().strip();
+    }
+
+    private String truncateToolResult(String result) {
+        if (!StringUtils.hasText(result) || result.length() <= MAX_TOOL_RESULT_LENGTH) {
+            return result;
+        }
+        return result.substring(0, MAX_TOOL_RESULT_LENGTH) + "\n[结果已截断，原始长度: " + result.length() + "]";
     }
 
     private CliTurn parseCliTurn(String output) {
@@ -533,7 +541,8 @@ public class ClaudeCodeCliAgentService implements AgentExecutor {
                 return false;
             }
             String normalized = path.normalize().toString();
-            return !normalized.startsWith(ALLOWED_EXPORT_ROOT);
+            String allowedRoot = agentProperties.getClaudeCodeCli().getAllowedExportRoot();
+            return !StringUtils.hasText(allowedRoot) || !normalized.startsWith(allowedRoot);
         }
         catch (Exception e) {
             return true;
@@ -863,14 +872,14 @@ public class ClaudeCodeCliAgentService implements AgentExecutor {
         }
 
         private void collect() {
-            try (InputStream is = inputStream) {
-                byte[] buffer = new byte[4096];
-                int read;
-                while ((read = is.read(buffer)) != -1) {
-                    if (read > 0) {
-                        synchronized (output) {
-                            output.append(new String(buffer, 0, read, StandardCharsets.UTF_8));
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    synchronized (output) {
+                        if (!output.isEmpty()) {
+                            output.append('\n');
                         }
+                        output.append(line);
                     }
                 }
             }

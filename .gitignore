@@ -39,4 +39,5 @@ build/
 
 ### Local Runtime ###
 .run/
+logs/
 logs/*-console.log
